@@ -5,6 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect, \
     HttpResponseNotAllowed, Http404
 from django.shortcuts import get_object_or_404
 
+import json
 
 # allow GET requests to create ratings -- this goes against the "GET" requests
 # should be idempotent but avoids the necessity of using <form> elements or
@@ -35,7 +36,14 @@ def rate_object(request, ct, pk, score=1, add=True):
         ratings_descriptor.unrate(request.user)
 
     if request.is_ajax():
-        return HttpResponse('{"success": true}', mimetype='application/json')
+        data = {"success": True,
+                "score": score,
+                "count": ratings_descriptor.count(),
+                "cumulative_score": ratings_descriptor.cumulative_score(),
+                "average_score": ratings_descriptor.average_score(),
+                }
+                
+        return HttpResponse(json.dumps(data), content_type='application/json')
     try:
         return HttpResponseRedirect(request.REQUEST.get('next') or
                                     request.META.get('HTTP_REFERER'))

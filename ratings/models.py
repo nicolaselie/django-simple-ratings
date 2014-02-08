@@ -207,6 +207,10 @@ class _RatingsDescriptor(models.Manager):
             def perform_aggregation(self, aggregator):
                 score = self.all().aggregate(agg=aggregator('score'))
                 return score['agg']
+            
+            def count(self):
+                # the number of votes
+                return self.perform_aggregation(models.Count)
 
             def cumulative_score(self):
                 # simply the sum of all scores, useful for +1/-1
